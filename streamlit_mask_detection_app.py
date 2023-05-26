@@ -5,8 +5,6 @@ from streamlit_webrtc import webrtc_streamer, VideoTransformerBase, RTCConfigura
 import torch
 from torchvision.transforms import ToTensor
 
-# Carregando o modelo
-classificador = torch.load('mask_detection_model.pth')
 
 #Detecção da face
 try:
@@ -26,7 +24,10 @@ class FaceMask(VideoTransformerBase):
         # Convertendo a imagem para escala de cinza
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(
-            image=img_gray, scaleFactor=1.3, minNeighbors=5)       
+            image=img_gray, scaleFactor=1.3, minNeighbors=5)
+        
+        # Carregando o modelo
+        classificador = torch.load('mask_detection_model.pth')  
 
         for (x, y, w, h) in faces:
             cv2.rectangle(img=img, pt1=(x, y), pt2=(
