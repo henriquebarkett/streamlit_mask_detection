@@ -336,8 +336,7 @@ matriz = evaluate_accuracy(model, test_dataloader, categorias)
 
 plt.figure(figsize=(8, 7))
 sns.set(font_scale=1.4)
-sns.heatmap(matriz.tolist(), 
-           annot=True, annot_kws={"size": 16}, fmt='d', cmap='viridis')
+sns.heatmap(matriz.tolist(), annot=True, annot_kws={"size": 16}, fmt='d', cmap='viridis')
 
 """## Saving the trained model"""
 
