@@ -7,60 +7,10 @@ import torch
 from torchvision import transforms
 from cnn_classifier import Classifier
 
-# Detecção da face
-try:
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-except Exception:
-    st.write("Erro ao iniciar detecção de face.")
 
 categorias = {0: 'incorrect_mask', 1: 'with_mask', 2: 'without_mask'}  # Dicionário com as categorias e seus índices correspondentes
 
 RTC_CONFIGURATION = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
-
-
-class FaceMask(VideoTransformerBase):
-    def __init__(self):
-        super().__init__()
-        self.label_colors = {
-            'Com Máscara': (0, 255, 0),    # Verde
-            'Sem Máscara': (255, 0, 0),    # Vermelho
-            'Uso Incorreto': (0, 0, 255)   # Azul
-        }
-
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-
-        pre_trained_weights = torch.load('mask_detection_model_stdict.pt')  # Carregar pesos do modelo
-        classificador = Classifier()
-        classificador.load_state_dict(pre_trained_weights)
-        classificador.eval()
-
-        faces = face_cascade.detectMultiScale(
-            image=img, scaleFactor=1.3, minNeighbors=5)
-
-        for (x, y, w, h) in faces:
-            cv2.rectangle(img=img, pt1=(x, y), pt2=(
-                x + w, y + h), color=(255, 0, 0), thickness=2)
-            roi = img[y:y + h, x:x + w]
-            roi = cv2.resize(roi, (224, 224), interpolation=cv2.INTER_AREA)
-            if np.sum([roi]) != 0:
-                # Pré-processar a ROI e converter para tensor
-                roi = roi.astype('float') / 255.0
-                roi = transforms.ToTensor()(roi).unsqueeze(0)
-
-                # Realizar a inferência utilizando o modelo PyTorch
-                with torch.no_grad():
-                    prediction = classificador(roi)
-                    maxindex = int(torch.argmax(prediction))
-                    finalout = categorias[maxindex]
-                    output = str(finalout)
-
-            label_position = (x, y)
-            label_color = self.label_colors[output]  # Obter a cor do rótulo com base no output
-            cv2.putText(img, output, label_position, cv2.FONT_HERSHEY_SIMPLEX, 1, label_color, 2)
-
-        return img
-    
 
 def home():
     st.title('Boas vindas ao Face Mask Detection')
@@ -72,12 +22,6 @@ def home():
             2. Classificação do uso de mascara facial através de imagens enviadas pelo usuário.
         '''
     )
-
-
-def realtime_classification():
-    st.header("Classificação em Tempo Real")
-    st.write("Clique em start para usar iniciar a webcam e detectar se você está usando máscara ou não")
-    webrtc_streamer(key="example", video_transformer_factory=FaceMask)
 
 
 def image_classification():
@@ -126,7 +70,6 @@ def about():
 
 pages = {
     'Home': home,
-    'Classificação em Tempo Real': realtime_classification,
     'Classificação por Imagem': image_classification,
     'Sobre': about,
 }
