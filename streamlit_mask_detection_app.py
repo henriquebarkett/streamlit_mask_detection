@@ -86,7 +86,7 @@ def image_classification():
     classificador.load_state_dict(pre_trained_weights)
     classificador.eval()
 
-    st.header("Classificação por Foto")
+    st.header("Classificação por Imagem")
     st.write("Faça o upload de uma foto e receba a classificação de máscara facial.")
 
     # Cria um campo de upload de arquivo
